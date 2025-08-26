@@ -1,0 +1,161 @@
+import { Play, Volume2, Copy, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import SourceCard from "./SourceCard";
+
+interface Source {
+  id: string;
+  title: string;
+  snippet: string;
+  url: string;
+  type: "document" | "web";
+}
+
+interface ResponsePanelProps {
+  response?: string;
+  sources?: Source[];
+  isLoading: boolean;
+  hasAudio?: boolean;
+}
+
+const ResponsePanel = ({ response, sources = [], isLoading, hasAudio = false }: ResponsePanelProps) => {
+  const handlePlayAudio = () => {
+    // Audio playback logic would go here
+    console.log("Playing AI response audio");
+  };
+
+  const handleCopyResponse = () => {
+    if (response) {
+      navigator.clipboard.writeText(response);
+    }
+  };
+
+  const handleFeedback = (positive: boolean) => {
+    console.log(`Feedback: ${positive ? "positive" : "negative"}`);
+  };
+
+  if (!response && !isLoading) {
+    return (
+      <Card className="card-elevated p-8 text-center">
+        <div className="space-y-4">
+          <div className="w-16 h-16 mx-auto gradient-primary rounded-full flex items-center justify-center">
+            <Volume2 className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Ready to Help
+            </h3>
+            <p className="text-muted-foreground">
+              Ask your agricultural question to get AI-powered insights with relevant sources.
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* AI Response */}
+      <Card className="card-elevated p-6 animate-fade-in">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">
+              AI Response
+            </h2>
+            <div className="flex items-center space-x-2">
+              {hasAudio && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePlayAudio}
+                  className="flex items-center space-x-1"
+                >
+                  <Play className="w-3 h-3" />
+                  <span>Play Audio</span>
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyResponse}
+                className="flex items-center space-x-1"
+              >
+                <Copy className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+          
+          {isLoading ? (
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                <span className="text-sm text-muted-foreground ml-2">AI is thinking...</span>
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 bg-muted rounded animate-pulse"></div>
+                <div className="h-4 bg-muted rounded animate-pulse w-4/5"></div>
+                <div className="h-4 bg-muted rounded animate-pulse w-3/5"></div>
+              </div>
+            </div>
+          ) : (
+            <div className="prose prose-sm max-w-none">
+              <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                {response}
+              </p>
+            </div>
+          )}
+          
+          {!isLoading && response && (
+            <div className="flex items-center justify-between pt-4 border-t border-border">
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleFeedback(true)}
+                  className="flex items-center space-x-1 text-muted-foreground hover:text-success"
+                >
+                  <ThumbsUp className="w-3 h-3" />
+                  <span>Helpful</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleFeedback(false)}
+                  className="flex items-center space-x-1 text-muted-foreground hover:text-destructive"
+                >
+                  <ThumbsDown className="w-3 h-3" />
+                  <span>Not Helpful</span>
+                </Button>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                Generated by LLaMA 3
+              </span>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Sources */}
+      {sources.length > 0 && (
+        <div className="space-y-4 animate-slide-up">
+          <h3 className="text-lg font-semibold text-foreground">
+            Related Sources
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              ({sources.length} found)
+            </span>
+          </h3>
+          <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+            {sources.map((source) => (
+              <SourceCard key={source.id} source={source} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ResponsePanel;
